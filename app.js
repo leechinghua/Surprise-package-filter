@@ -30,3 +30,57 @@ products.forEach(product => {
 
   tbody.appendChild(tr); // 將 tr 加入 tbody
 });
+
+// 機制：輸入總價後，選出符合條件的商品組合
+function findCombinations(products, targetPrice) {
+  const result = [];
+
+  function backtrack(currentCombination, currentSum, startIndex) {
+    // 如果當前總和達到目標價，將組合加入結果
+    if (currentSum === targetPrice) {
+      result.push([...currentCombination]);
+      return;
+    }
+
+    // 如果超過目標價，停止遞迴
+    if (currentSum > targetPrice) {
+      return;
+    }
+
+    // 遍歷商品，嘗試選擇每個商品
+    for (let i = startIndex; i < products.length; i++) {
+      currentCombination.push(products[i]); // 選擇當前商品
+      backtrack(currentCombination, currentSum + products[i].price, i); // 遞迴，允許重複選擇
+      currentCombination.pop(); // 撤銷選擇
+    }
+  }
+
+  backtrack([], 0, 0); // 開始遞迴
+  return result;
+}
+  // 處理按鈕點擊事件
+  document.getElementById("calculateBtn").addEventListener("click", () => {
+    const targetPrice = parseInt(document.getElementById("targetPrice").value, 10); // 獲取輸入的目標價格
+    const resultDiv = document.getElementById("result");
+    resultDiv.innerHTML = ""; // 清空結果區域
+
+    if (isNaN(targetPrice) || targetPrice <= 0) {
+      resultDiv.textContent = "請輸入有效的總價！";
+      return;
+    }
+
+    // 計算符合的商品組合
+    const combinations = findCombinations(products, targetPrice);
+
+    // 顯示結果
+    if (combinations.length === 0) {
+      resultDiv.textContent = "找不到符合條件的商品組合。";
+    } else {
+      combinations.forEach((combination, index) => {
+        const combinationText = `組合 ${index + 1}: ${combination.map(item => `${item.name} ($${item.price})`).join(", ")}`;
+        const p = document.createElement("p");
+        p.textContent = combinationText;
+        resultDiv.appendChild(p);
+      });
+    }
+  });
