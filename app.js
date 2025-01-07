@@ -14,9 +14,8 @@ const products = [
 // 商品輸入
 const tbody = document.querySelector("#tbody");
 
-
 // 將 products 資料加入到 tbody 中
-products.forEach(product => {
+products.forEach((product) => {
   const tr = document.createElement("tr"); // 建立 tr 元素
 
   const tdName = document.createElement("td"); // 建立 td 元素 (商品名稱)
@@ -58,29 +57,62 @@ function findCombinations(products, targetPrice) {
   backtrack([], 0, 0); // 開始遞迴
   return result;
 }
-  // 處理按鈕點擊事件
-  document.getElementById("calculateBtn").addEventListener("click", () => {
-    const targetPrice = parseInt(document.getElementById("targetPrice").value, 10); // 獲取輸入的目標價格
-    const resultDiv = document.getElementById("result");
-    resultDiv.innerHTML = ""; // 清空結果區域
+// 處理按鈕點擊事件
+document.getElementById("calculateBtn").addEventListener("click", () => {
+  const targetPrice = parseInt(
+    document.getElementById("targetPrice").value,
+    10
+  ); // 獲取輸入的目標價格
+  const combinationTable = document.getElementById("combinationTable");
+  combinationTable.innerHTML = ""; // 清空結果區域
 
-    if (isNaN(targetPrice) || targetPrice <= 0) {
-      resultDiv.textContent = "請輸入有效的總價！";
-      return;
-    }
+  if (isNaN(targetPrice) || targetPrice <= 0) {
+    combinationTable.textContent = "請輸入有效的總價！";
+    return;
+  }
 
-    // 計算符合的商品組合
-    const combinations = findCombinations(products, targetPrice);
+  // 計算符合的商品組合
+  const combinations = findCombinations(products, targetPrice);
 
-    // 顯示結果
-    if (combinations.length === 0) {
-      resultDiv.textContent = "找不到符合條件的商品組合。";
-    } else {
-      combinations.forEach((combination, index) => {
-        const combinationText = `組合 ${index + 1}: ${combination.map(item => `${item.name} ($${item.price})`).join(", ")}`;
-        const p = document.createElement("p");
-        p.textContent = combinationText;
-        resultDiv.appendChild(p);
+  // 限制只顯示前兩個組合
+  const limitedCombinations = combinations.slice(0, 2);
+
+  // 顯示結果
+  if (combinations.length === 0) {
+    combinationTable.textContent = "找不到符合條件的商品組合。";
+  } else {
+    limitedCombinations.forEach((combination, index) => {
+      // 建立表格
+      const table = document.createElement("table");
+      const thead = document.createElement("thead");
+      const tbody = document.createElement("tbody");
+
+      // 建立表格標題
+      thead.innerHTML = `
+        <br>
+          <tr>
+            <th colspan="2">組合 ${index + 1}</th>
+          </tr>
+          <tr>
+            <th>商品名稱</th>
+            <th>價格</th>
+          </tr>
+        `;
+
+      // 建立表格內容
+      combination.forEach((item) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${item.name}</td>
+            <td>$${item.price}</td>
+          `;
+        tbody.appendChild(row);
       });
-    }
-  });
+
+      // 合併表格並插入結果區域
+      combinationTable.appendChild(thead);
+      combinationTable.appendChild(tbody);
+      // combinationTable.appendChild(table);
+    });
+  }
+});
