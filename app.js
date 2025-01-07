@@ -10,6 +10,11 @@ const products = [
   { name: "寶格麗水能量男性淡香水100ml", price: 2890 },
   { name: "雅頓向日葵女性淡香水100ml", price: 700 },
   { name: "hermes大地男性淡香水100ml", price: 2700 },
+  { name: "chanel藍色男性香水100ml", price: 5190 },
+  { name: "hermes大地男性淡香水100ml", price: 2700 },
+  { name: "雅頓真愛女性淡香水100ml", price: 700 },
+  { name: "愛馬仕緋紅火參古龍水100ml", price: 3390 },
+  { name: "愛馬仕H24男性淡香水100ml", price: 2580 },
 ];
 // 商品輸入
 const tbody = document.querySelector("#tbody");
@@ -34,7 +39,12 @@ products.forEach((product) => {
 function findCombinations(products, targetPrice) {
   const result = [];
 
-  function backtrack(currentCombination, currentSum, startIndex) {
+  function backtrack(
+    currentCombination,
+    currentSum,
+    startIndex,
+    allowDuplicates
+  ) {
     // 如果當前總和達到目標價，將組合加入結果
     if (currentSum === targetPrice) {
       result.push([...currentCombination]);
@@ -42,19 +52,29 @@ function findCombinations(products, targetPrice) {
     }
 
     // 如果超過目標價，停止遞迴
-    if (currentSum > targetPrice) {
-      return;
-    }
+    if (currentSum > targetPrice) return;
 
     // 遍歷商品，嘗試選擇每個商品
     for (let i = startIndex; i < products.length; i++) {
+     // 如果不允許重複，並且當前商品已經在組合中，跳過
+     if (!allowDuplicates && currentCombination.some(item => item.name === products[i].name)) {
+      continue;
+    } 
       currentCombination.push(products[i]); // 選擇當前商品
-      backtrack(currentCombination, currentSum + products[i].price, i); // 遞迴，允許重複選擇
+      backtrack(
+        currentCombination,
+        currentSum + products[i].price,
+        allowDuplicates ? i : i + 1, // 無重複組合跳到下一個，允許重複則從當前繼續
+        allowDuplicates
+      );
       currentCombination.pop(); // 撤銷選擇
     }
   }
 
-  backtrack([], 0, 0); // 開始遞迴
+  // 優先計算無重複的商品組合
+  backtrack([], 0, 0, false);
+  // 如果無重複組合不足，再計算允許重複的商品組合
+  if (result.length === 0) backtrack([], 0, 0, true); // 開始遞迴
   return result;
 }
 // 處理按鈕點擊事件
